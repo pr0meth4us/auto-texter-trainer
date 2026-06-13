@@ -12,7 +12,7 @@ This pipeline solves the "Context vs. Privacy" problem through a localized, auto
 
 ### 1. Zero-Shot Named Entity Recognition (NER)
 To scrub the dataset, we cannot rely on standard English dictionaries because bilingual texting contains phonetic slang and non-standard capitalization.
-- **How it works:** The `src/extract_names.py` script leverages the Gemini 3.5 Flash inference engine to perform contextual Named Entity Recognition. It scans the raw conversational history in chunks and flags linguistic patterns that represent names, relationship identifiers (e.g., "mom", "boss", "babe", "my ex"), and locations.
+- **How it works:** The `src/extract_names.py` script leverages the Gemini 3.5 Flash inference engine to perform contextual Named Entity Recognition. It scans the raw conversational history in chunks and flags linguistic patterns that represent names, relationship identifiers, and locations.
 - **The Result:** An exhaustive `data/blocklist.txt` tailored specifically to the user's localized dialect.
 
 ### 2. High-Throughput Dataset Anonymization
