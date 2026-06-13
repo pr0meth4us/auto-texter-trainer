@@ -8,7 +8,7 @@ with open("../data/blocklist.txt", "r", encoding="utf-8") as f:
 names.sort(key=len, reverse=True)
 
 print("Loading dataset...")
-with open("../data/subset_10k.txt", "r", encoding="utf-8") as f:
+with open("../data/raw_history.txt", "r", encoding="utf-8") as f:
     text = f.read()
 
 print(f"Scrubbing {len(names)} names from the text...")
@@ -18,7 +18,7 @@ for name in names:
     text = re.sub(pattern, '[FRIEND]', text, flags=re.IGNORECASE)
 
 print("Saving sanitized dataset...")
-with open("../data/subset_10k_sanitized.txt", "w", encoding="utf-8") as f:
+with open("../data/raw_history_sanitized.txt", "w", encoding="utf-8") as f:
     f.write(text)
 
 print("✅ Data sanitization complete!")
