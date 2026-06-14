@@ -1,13 +1,13 @@
 # Ignore raw chat data exports and datasets
 inbox/
-data/
+/data/
 archive/
-*.json
-*.jsonl
-*.html
-*.txt
-dataset.jsonl
-*.csv
+/*.json
+/*.jsonl
+/*.html
+/*.txt
+/dataset.jsonl
+/*.csv
 
 # Python standard
 __pycache__/
