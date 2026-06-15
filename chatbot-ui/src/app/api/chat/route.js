@@ -1,12 +1,13 @@
 import { GoogleGenAI } from '@google/genai';
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 
 let configCache = { value: null, expires: 0 };
 
-async function getGeminiApiKey() {
-  if (Date.now() < configCache.expires && configCache.value?.GEMINI_API_KEY) {
-    return configCache.value.GEMINI_API_KEY;
+async function getVertexAiCredentials() {
+  if (Date.now() < configCache.expires && configCache.value?.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+    return configCache.value.GOOGLE_APPLICATION_CREDENTIALS_JSON;
   }
   
   const url = (process.env.BIFROST_URL || "http://bifrost:5000").replace(/\/$/, "");
@@ -25,7 +26,7 @@ async function getGeminiApiKey() {
         const data = await res.json();
         if (data.status === 'success' && data.data && data.data.api_keys) {
           configCache = { value: data.data.api_keys, expires: Date.now() + 300000 }; // 5 min cache
-          return data.data.api_keys.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+          return data.data.api_keys.GOOGLE_APPLICATION_CREDENTIALS_JSON;
         }
       } else {
         console.error('Failed to fetch from Bifrost:', res.status);
@@ -34,9 +35,9 @@ async function getGeminiApiKey() {
       console.error('Error fetching Bifrost config:', e);
     }
   } else {
-    console.warn("Bifrost credentials missing, falling back to local env.");
+    console.warn("Bifrost credentials missing.");
   }
-  return process.env.GEMINI_API_KEY;
+  return process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
 }
 
 export async function POST(request) {
@@ -47,13 +48,23 @@ export async function POST(request) {
     const dataFilePath = path.join(process.cwd(), 'src/data/subset_10k_sanitized.txt');
     const historyText = fs.readFileSync(dataFilePath, 'utf8');
 
-    const apiKey = await getGeminiApiKey();
-    if (!apiKey) {
-      throw new Error("GEMINI_API_KEY is not configured.");
+    const credsJson = await getVertexAiCredentials();
+    if (!credsJson) {
+      throw new Error("GOOGLE_APPLICATION_CREDENTIALS_JSON is not configured in Bifrost.");
     }
 
-    // Initialize the Gemini client
-    const ai = new GoogleGenAI({ apiKey });
+    // Write to a temporary file for the SDK to consume
+    const tmpCredsPath = path.join(os.tmpdir(), 'bifrost_vertex_creds.json');
+    fs.writeFileSync(tmpCredsPath, credsJson, 'utf8');
+    process.env.GOOGLE_APPLICATION_CREDENTIALS = tmpCredsPath;
+
+    // Initialize the Vertex AI client
+    const ai = new GoogleGenAI({ 
+        vertexai: { 
+            project: 'khmer-ocr-496606', 
+            location: 'asia-southeast1' 
+        } 
+    });
     
     // Construct system prompt
     const systemInstruction = [
@@ -65,7 +76,6 @@ export async function POST(request) {
     ].join('\n');
 
     // Format previous messages for the Gemini SDK
-    // Next.js client sends an array of { role: 'user' | 'assistant', content: string }
     const contents = messages.map(msg => ({
       role: msg.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: msg.content }]
