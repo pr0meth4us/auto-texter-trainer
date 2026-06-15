@@ -58,11 +58,13 @@ export async function POST(request) {
     fs.writeFileSync(tmpCredsPath, credsJson, 'utf8');
     process.env.GOOGLE_APPLICATION_CREDENTIALS = tmpCredsPath;
 
-    // Initialize the Vertex AI client
+    // Initialize the Vertex AI client - project loaded from Bifrost
+    const vertexProject = process.env.VERTEX_AI_PROJECT || 'gen-lang-client-0429923800';
+    const vertexLocation = process.env.VERTEX_AI_LOCATION || 'asia-southeast1';
     const ai = new GoogleGenAI({ 
         vertexai: { 
-            project: 'khmer-ocr-496606', 
-            location: 'asia-southeast1' 
+            project: vertexProject, 
+            location: vertexLocation 
         } 
     });
     
