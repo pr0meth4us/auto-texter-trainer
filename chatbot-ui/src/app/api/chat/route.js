@@ -2,6 +2,43 @@ import { GoogleGenAI } from '@google/genai';
 import fs from 'fs';
 import path from 'path';
 
+let configCache = { value: null, expires: 0 };
+
+async function getGeminiApiKey() {
+  if (Date.now() < configCache.expires && configCache.value?.GEMINI_API_KEY) {
+    return configCache.value.GEMINI_API_KEY;
+  }
+  
+  const url = (process.env.BIFROST_URL || "http://bifrost:5000").replace(/\/$/, "");
+  const clientId = process.env.BIFROST_CLIENT_ID;
+  const webhookSecret = process.env.BIFROST_WEBHOOK_SECRET;
+
+  if (clientId && webhookSecret) {
+    try {
+      const res = await fetch(`${url}/api/v1/config`, {
+        headers: {
+          'X-Client-ID': clientId,
+          'X-Webhook-Secret': webhookSecret
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.status === 'success' && data.data && data.data.api_keys) {
+          configCache = { value: data.data.api_keys, expires: Date.now() + 300000 }; // 5 min cache
+          return data.data.api_keys.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+        }
+      } else {
+        console.error('Failed to fetch from Bifrost:', res.status);
+      }
+    } catch (e) {
+      console.error('Error fetching Bifrost config:', e);
+    }
+  } else {
+    console.warn("Bifrost credentials missing, falling back to local env.");
+  }
+  return process.env.GEMINI_API_KEY;
+}
+
 export async function POST(request) {
   try {
     const { messages } = await request.json();
@@ -10,8 +47,13 @@ export async function POST(request) {
     const dataFilePath = path.join(process.cwd(), 'src/data/subset_10k_sanitized.txt');
     const historyText = fs.readFileSync(dataFilePath, 'utf8');
 
+    const apiKey = await getGeminiApiKey();
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY is not configured.");
+    }
+
     // Initialize the Gemini client
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    const ai = new GoogleGenAI({ apiKey });
     
     // Construct system prompt
     const systemInstruction = [
