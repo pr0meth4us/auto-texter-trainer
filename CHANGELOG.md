@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- **Centralized Config**: Integrated `bifrost_config.py` SDK for securely fetching API keys directly from the Bifrost Remote Config Server over HTTPS.
 - Created `chatbot-ui`, a Next.js web application for interacting with the AI Persona Clone.
   - Implemented a secure Next.js API Route for connecting to Google Gemini 3.5 Flash.
   - Included the sanitized dataset (`subset_10k_sanitized.txt`) in the UI `src/data/` folder for Vercel deployment support.
