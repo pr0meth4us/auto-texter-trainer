@@ -1,46 +1,32 @@
 import os
-import google.generativeai as genai
+import sys
 import time
 
-# 1. Setup API
-# Replace this with your actual API key!
-genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+# Add src to sys.path so we can import utils
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src.utils import bifrost_config
 
-import csv
+import vertexai
+from vertexai.tuning import sft
 
-# 2. Read the CSV data directly
-print("Loading dataset...")
-training_data = []
-with open("../data/training_subset.csv", "r", encoding="utf-8") as f:
-    reader = csv.DictReader(f)
-    for row in reader:
-        training_data.append({
-            "text_input": row["input"],
-            "output": row["output"]
-        })
+print("Setting up Vertex AI Tuning...")
 
-print(f"Loaded {len(training_data)} examples.")
+project_id = bifrost_config.get_config("GCP_PROJECT_ID", "gen-lang-client-0429923800")
+location = bifrost_config.get_config("GCP_LOCATION", "us-central1")
 
-# 3. Start the Tuning Job
-print("Starting fine-tuning job...")
+vertexai.init(project=project_id, location=location)
+
+print("Starting supervised fine-tuning (SFT) job on Vertex AI...")
+
 try:
-    operation = genai.create_tuned_model(
-        display_name="my-auto-texter",
-        source_model="models/gemini-1.5-flash-001-tuning",
-        training_data=training_data,
-        epoch_count=3,
-        batch_size=4,
-        learning_rate=0.001
+    sft_tuning_job = sft.train(
+        source_model="gemini-2.5-flash",
+        train_dataset="gs://auto-texter-trainer-data-1781715368/dataset_10k_vertex.jsonl",
+        tuned_model_display_name="my-auto-texter"
     )
 
-    print("Job started! Waiting for it to finish (this might take 30-60 minutes)...")
-
-    # 4. Check status loop
-    for status in operation.wait_bar():
-        time.sleep(10)
-
-    print("Finished!")
-    result = operation.result()
-    print(f"Your new custom Model ID is: {result.name}")
+    print("Job started! Wait for it to finish in the Google Cloud Console.")
+    print(f"Tuning job name: {sft_tuning_job.name}")
+    
 except Exception as e:
     print(f"An error occurred: {e}")
