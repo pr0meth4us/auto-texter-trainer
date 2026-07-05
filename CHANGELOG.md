@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- **Training and Diagnostic Scripts**:
+  - `scripts/check_messages.py` and `scripts/list_groups.py` for Telegram metadata validation.
+  - `src/cancel_jobs.py` for fine-tuning pipeline control.
+  - `src/test_inference.py` for local inference evaluations.
+  - `src/train_model.ipynb` Jupyter Notebook for LLM training workflow.
 - **Synchronous Config Pull**: Embedded Bifrost SDK directly into `bifrost_config.py` to synchronously pull and inject API keys straight into local memory at boot, removing the need for `bifrost_local.py` or cache threads.
 - Created `chatbot-ui`, a Next.js web application for interacting with the AI Persona Clone.
   - Implemented a secure Next.js API Route for connecting to Google Gemini 3.5 Flash.
