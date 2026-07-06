@@ -16,3 +16,4 @@ env/
 venv/
 .env
 instagram_session.json
+.DS_Store
