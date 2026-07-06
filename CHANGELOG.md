@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+### Changed
+- **Bifrost Integration**: Consolidated local `src/utils/bifrost_config.py` into a redirection proxy to consume the central client SDK.
+
 ### Added
 - **Training and Diagnostic Scripts**:
   - `scripts/check_messages.py` and `scripts/list_groups.py` for Telegram metadata validation.
@@ -15,6 +19,4 @@ All notable changes to this project will be documented in this file.
   - Included the sanitized dataset (`subset_10k_sanitized.txt`) in the UI `src/data/` folder for Vercel deployment support.
   - Designed a custom, responsive, vanilla CSS front-end with dark mode, gradients, and micro-animations.
   - Set up a `.env.local` configuration for handling the `GEMINI_API_KEY`.
-## [Unreleased]
-### Added
-- Migrated `chatbot-ui` AI route to use Vertex AI and pull ADC securely from Bifrost Vault.
+  - Migrated `chatbot-ui` AI route to use Vertex AI and pull ADC securely from Bifrost Vault.
