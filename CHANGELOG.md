@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Changed
-- **Bifrost Integration**: Consolidated local `src/utils/bifrost_config.py` into a redirection proxy to consume the central client SDK.
+- **Bifrost Integration**: Consolidated local `src/utils/bifrost_config.py` into a redirection proxy to consume the central client SDK, and refactored name extraction scripts (`src/extract_names.py`) to resolve keys dynamically.
 
 ### Added
 - **Training and Diagnostic Scripts**:

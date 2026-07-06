@@ -3,9 +3,15 @@ import os
 from google import genai
 from google.genai import types
 
-api_key = os.getenv("GEMINI_API_KEY")
+import sys
+
+# Load central Bifrost SDK
+sys.path.append("/Users/nicksng/code/bifrost/sdk/python")
+import bifrost_client
+
+api_key = bifrost_client.get_config("GEMINI_API_KEY", os.getenv("GEMINI_API_KEY", ""))
 if not api_key:
-    raise ValueError("GEMINI_API_KEY not found in environment variables.")
+    raise ValueError("GEMINI_API_KEY not found in environment or Bifrost vault.")
 client = genai.Client(api_key=api_key)
 
 print("Loading 10k subset...")
